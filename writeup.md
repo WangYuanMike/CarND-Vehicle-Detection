@@ -36,7 +36,7 @@ I used the vehicle and non-vehicle dataset provided in lecture 40 Tips and Trick
 * vehicle_images (8792, 64, 64, 3)
 
 #### 2. Extract HOG, color spatial, and color histogram features
-All feature extract parameters are shown in the table. I chose YCrCb as the color space and extracted HOG features of all 3 channels, so that the majority of the features are HOG. Finally I combined all the features and used StandardScalor() to normalize all features.
+All feature extract parameters are shown in the table. I chose YCrCb as the color space and extracted HOG features of all 3 channels, so that the majority of the features are HOG. Finally I combined all the features and used StandardScalor() to normalize them.
 
 | parameter | value |
 |:---------:|:-----:|
@@ -52,7 +52,7 @@ All feature extract parameters are shown in the table. I chose YCrCb as the colo
 | color space for all features | YCrCb |
 
 #### 3. Train classifier
-First of all, data set (including both vechicle and non-vehicle images) has been splitted into training set and test set.
+Data set (including both vechicle and non-vehicle images) has been splitted into training set and test set.
 * Train set size: 14208
 * Test set size: 3552
 
@@ -69,6 +69,8 @@ First I implemented a function named find_car_single_image() to get box list of 
 * pix_per_cell=12(window=96), cells_per_step=2
 * pix_per_cell=16(window=128), cells_per_step=1
 * pix_per_cell=16(window=128), cells_per_step=2
+
+
 Based on the output images, I decided to choose 3 scales with specific search area:
 * **pix_per_cell=8(window=64), cells_per_step=1, ystart=400, ystop=500, xstart=650, xstop=1250**
 * **pix_per_cell=12(window=96), cells_per_step=1, ystart=400, ystop=680, xstart=650, xstop=1250**
@@ -86,7 +88,7 @@ Here's a [link to my video result](./project_video_final.mp4)
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-The corresponding coding cells are called "Sliding window to search vehicles", "Use heatmap to draw bound box to track vehicle", and "Video Generation". **process() in class VideoProcessor** is the main method for video generation. In this method, I first get box list of the current frame by sliding window search, then I add half of box list history into the box list of the current frame (kind of using exponentially average to make the bounding box more stable), then I used heatmap (with a threshold of 2) and label function to detect and draw bounding box on cars. And finally I used the box list, which contains the exponential average history of box list, to update the history variable of the instance.
+The corresponding coding cells are called "Sliding window to search vehicles", "Use heatmap to draw bound box to track vehicle", and "Video Generation". **process() in class VideoProcessor** is the main method for video generation. In this method, I first get box list of the current frame by sliding window search, then I add half of box list history (the box list of previous frames) into the box list of the current frame (kind of using exponentially average to make the bounding box more stable), then I used heatmap (with a threshold of 2) and label function to detect and draw bounding box on cars. And finally I used the box list, which contains the exponential average history of box list, to update the history variable of the instance.
 
 ---
 
