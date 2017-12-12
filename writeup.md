@@ -36,27 +36,27 @@ I used the vehicle and non-vehicle dataset provided in lecture 40 Tips and Trick
 * vehicle_images (8792, 64, 64, 3)
 
 #### 2. Extract HOG, color spatial, and color histogram features
-I used the recommended parameter values in the lecture to retrieve the HOG and color histogram features. For the color spatial features, I changed the resize size from (32, 32) to (16, 16) after several round of testing, because it could reduce the number of color spatial features to 768, so that HOG features (1764) would be the majority for training and predicting. I have tried out several color spaces, e.g. YCrCb, but all of them did not show a convincing better result than RGB. Therefore, I decide to choose RGB as the color space to extract all features. Finally I combined all the features and used StandardScalor() to scale them.
+All feature extract parameters are shown in the table. I chose YCrCb as the color space and extracted HOG features of all 3 channels, so that the majority of the features are HOG. Finally I combined all the features and used StandardScalor() to normalize all features.
 
 | parameter | value |
 |:---------:|:-----:|
 | HOG orient    | 9     |
 | HOG pixels_per_cell | 8|
 | HOG cell_per_block | 2 |
-| color spatial size| (16, 16) |
-| color histogram bins | 32 |
-| HOG features | (7, 7, 2, 2, 9) = 1764 |
-| color spatial features | 768 |
-| color histogram features | 96 |
-| total number of features | 2628 |
-| color space for all features | RGB |
+| color spatial size| (32, 32) |
+| color histogram bins | 128 |
+| HOG features | (7, 7, 2, 2, 9) * 3 = 5292 |
+| color spatial features | 3072 |
+| color histogram features | 384 |
+| total number of features | 8748 |
+| color space for all features | YCrCb |
 
 #### 3. Train classifier
 First of all, data set (including both vechicle and non-vehicle images) has been splitted into training set and test set.
 * Train set size: 14208
 * Test set size: 3552
 
-Then I trained a LinearSVC() as suggested from the lecture. The test accuracy is higher than 98%, and it took about 7 seconds to train the model. But later I found it has problem in detecting black cars in the test images, especially when the sliding window size is big, e.g. 96, or 128, which finally causes unstable tracking rectangle in the final video generation. Therefore, I decided to change the model to SVC() with default kernel and gamma values and a smaller C value (0.5) to prevent overfitting. The test accuracy of SVC() model is higher than 99%, and it becomes much better in detecting black cars. In the meantime, the detection of white cars by the new model works pretty fine as well. The cons of the SVC() model is that it took more than 120 seconds to train, and the predict time is also much longer than the linear one.
+I trained a LinearSVC() with a lower C value(0.5) to prevent overfitting. The test accuracy is higher than 99%.
 
 ### Sliding Window Search
 
@@ -69,7 +69,10 @@ First I implemented a function named find_car_single_image() to get box list of 
 * pix_per_cell=12(window=96), cells_per_step=2
 * pix_per_cell=16(window=128), cells_per_step=1
 * pix_per_cell=16(window=128), cells_per_step=2
-And from the output images, the best one is **pix_per_cell=12(window=96), cells_per_step=1**. I did not use mutiple scale to search, because the SVC() model is pretty slow on my laptop. Plus, the window size I chose is fine to track small cars(cars which are far away), and for big cars(cars which are near) it will draw multiple boxes which finally form a good heatmap of the car.
+Based on the output images, I decided to choose 3 scales with specific search area:
+* **pix_per_cell=8(window=64), cells_per_step=1, ystart=400, ystop=500, xstart=650, xstop=1250**
+* **pix_per_cell=12(window=96), cells_per_step=1, ystart=400, ystop=680, xstart=650, xstop=1250**
+* **pix_per_cell=16(window=128), cells_per_step=1, ystart=400, ystop=680, xstart=650, xstop=1250**
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
@@ -91,6 +94,6 @@ The corresponding coding cells are called "Sliding window to search vehicles", "
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-* The main issue is that SVC() model is too slow to make prediction, therefore I have to give up multi-scale window search on my laptop. Maybe I can still use LinearSVC() model and some data augmentation technic to mitigate the black car detection problem.
+* One issue is that on my laptop the model takes 1.6 seconds to make prediction for one frame, which might be too slow in a productive environment. 
 * The other issue is that the bounding box is still not stable enough, also occasionally false positive appears. I am interested in more advanced approach to stablize bounding box with history.
 
