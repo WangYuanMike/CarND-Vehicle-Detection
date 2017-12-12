@@ -88,7 +88,7 @@ Here's a [link to my video result](./project_video_final.mp4)
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-The corresponding coding cells are called "Sliding window to search vehicles", "Use heatmap to draw bound box to track vehicle", and "Video Generation". **process() in class VideoProcessor** is the main method for video generation. In this method, I first get box list of the current frame by sliding window search, then I add half of box list history (the box list of previous frames) into the box list of the current frame (kind of using exponentially average to make the bounding box more stable), then I used heatmap (with a threshold of 2) and label function to detect and draw bounding box on cars. And finally I used the box list, which contains the exponential average history of box list, to update the history variable of the instance.
+The corresponding coding cells are called "Sliding window to search vehicles", "Use heatmap to draw bound box to track vehicle", and "Video Generation". **Method process() in class VideoProcessor** is the main method for video generation. In this method, I first get box list of the current frame by sliding window search, then I add half of box list history (the box list of previous frames) into the box list of the current frame (kind of using exponentially average to make the bounding box more stable), then I used heatmap (with a threshold of 2) and label function to detect and draw bounding box on cars. And finally I used the box list, which contains the exponential average history of box list, to update the history variable of the instance.
 
 ---
 
